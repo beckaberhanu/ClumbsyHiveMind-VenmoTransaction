@@ -1,3 +1,4 @@
+import sys
 columns = {
     '_id': 0,
     'date_updated': 1,
@@ -75,6 +76,7 @@ columns = {
     'payment.merchant_split_purchase.authorization_id': 73,
     'payment.merchant_split_purchase.merchant_name': 74,
     'payment.date_completed': 75,
+    # I think transactions with merchants might all be private
     'payment.target.merchant': 76,
     'payment.target.redeemable_target.type': 77,
     'payment.target.redeemable_target.display_name': 78,
@@ -96,6 +98,7 @@ columns = {
     'payment.target.user.first_name': 94,
     'payment.target.user.friend_status': 95,
     'payment.target.user.email': 96,
+    # 'user', 'phone', 'redeemable' or 'email', this columns only ever contains phone, redeemable or email when the transaction is pending. Not sure why.
     'payment.target.type': 97,
     'payment.target.email': 98,
     'payment.audience': 99,
@@ -405,111 +408,152 @@ columns = {
     'user_shared_auth': 403,
 }
 
-comment_csv = {
-    'comments.data.1.user.username': 48,
-    'comments.data.1.user.about': 49,
-    'comments.data.1.user.last_name': 50,
-    'comments.data.1.user.display_name': 51,
-    'comments.data.1.user.friends_count': 52,
-    'comments.data.1.user.is_group': 53,
-    'comments.data.1.user.is_active': 54,
-    'comments.data.1.user.trust_request': 55,
-    'comments.data.1.user.email': 56,
-    'comments.data.1.user.phone': 57,
-    'comments.data.1.user.profile_picture_url': 58,
-    'comments.data.1.user.first_name': 59,
-    'comments.data.1.user.friend_status': 60,
-    'comments.data.1.user.is_blocked': 61,
-    'comments.data.1.user.id': 62,
-    'comments.data.1.user.identity': 63,
-    'comments.data.1.user.date_joined': 64,
-    'comments.data.1.date_created': 65,
-    'comments.data.1.message': 66,
-    'comments.data.1.id': 67,
-    'comments.data.1.mentions.count': 68,
-    'comments.data.1.mentions.data': 69,
-}
+comment_csv = [
+    {
+        'comments.data.0.id': 30,
+        'payment.id': 71,
+        'comments.data.0.date_created': 9,
+        'comments.data.0.user.username': 31,
+        'comments.data.0.user.id': 40,
+        'comments.data.0.message': 10,
+        'comments.data.0.mentions.count': 11,
+        'app.name': 7,
+        'app.id': 6,
+    },
+    {
+        'comments.data.1.id': 67,
+        'payment.id': 71,
+        'comments.data.1.date_created': 65,
+        'comments.data.1.user.username': 48,
+        'comments.data.1.user.id': 62,
+        'comments.data.1.message': 66,
+        'comments.data.1.mentions.count': 68,
+        'app.name': 7,
+        'app.id': 6,
+    }
+]
+
+user_csv = [
+    {
+        'payment.target.user.id': 89,
+        'payment.target.user.username': 80,
+        'payment.target.user.first_name': 94,
+        'payment.target.user.last_name': 81,
+        'payment.target.user.display_name': 93,
+
+    },
+    {
+        'payment.actor.id': 109,
+        'payment.actor.username': 100,
+        'payment.actor.first_name': 114,
+        'payment.actor.last_name': 101,
+        'payment.actor.display_name': 113,
+    },
+    {
+        'likes.data.0.id': 135,
+        'likes.data.0.username': 126,
+        'likes.data.0.first_name': 140,
+        'likes.data.0.last_name': 127,
+        'likes.data.0.display_name': 139,
+    },
+    {
+        'likes.data.1.id': 157,
+        'likes.data.1.username': 143,
+        'likes.data.1.first_name': 154,
+        'likes.data.1.last_name': 145,
+        'likes.data.1.display_name': 146,
+    },
+    {
+        'comments.data.0.user.id': 40,
+        'comments.data.0.user.username': 31,
+        'comments.data.0.user.first_name': 45,
+        'comments.data.0.user.last_name': 32,
+        'comments.data.0.user.display_name': 44,
+    },
+    {
+        'comments.data.1.user.id': 62,
+        'comments.data.1.user.username': 48,
+        'comments.data.1.user.first_name': 59,
+        'comments.data.1.user.last_name': 50,
+        'comments.data.1.user.display_name': 51,
+    },
+    {
+        'comments.data.0.mentions.data.0.user.id': 27,
+        'comments.data.0.mentions.data.0.user.username': 13,
+        'comments.data.0.mentions.data.0.user.first_name': 24,
+        'comments.data.0.mentions.data.0.user.last_name': 15,
+        'comments.data.0.mentions.data.0.user.display_name': 16,
+    },
+    {
+        'mentions.data.0.user.id': 171,
+        'mentions.data.0.user.username': 162,
+        'mentions.data.0.user.first_name': 176,
+        'mentions.data.0.user.last_name': 163,
+        'mentions.data.0.user.display_name': 175,
+    },
+    {
+        'mentions.data.1.user.id': 189,
+        'mentions.data.1.user.username': 180,
+        'mentions.data.1.user.first_name': 194,
+        'mentions.data.1.user.last_name': 181,
+        'mentions.data.1.user.display_name': 193,
+    },
+    {
+        'mentions.data.2.user.id': 210,
+        'mentions.data.2.user.username': 199,
+        'mentions.data.2.user.first_name': 211,
+        'mentions.data.2.user.last_name': 203,
+        'mentions.data.2.user.display_name': 197,
+    },
+    {
+        'mentions.data.3.user.id': 230,
+        'mentions.data.3.user.username': 216,
+        'mentions.data.3.user.first_name': 227,
+        'mentions.data.3.user.last_name': 218,
+        'mentions.data.3.user.display_name': 219,
+    },
+    {
+        'mentions.data.4.user.id': 248,
+        'mentions.data.4.user.username': 234,
+        'mentions.data.4.user.first_name': 245,
+        'mentions.data.4.user.last_name': 236,
+        'mentions.data.4.user.display_name': 237,
+    }
+]
 
 payment_csv = {
-    'payment.status': 70,
     'payment.id': 71,
-    'payment.date_authorized': 72,
-    # 'payment.merchant_split_purchase.authorization_id': 73,
-    # 'payment.merchant_split_purchase.merchant_name': 74,
-    'payment.date_completed': 75,
-    'payment.target.merchant': 76,
-    # 'payment.target.redeemable_target.type': 77,
-    # 'payment.target.redeemable_target.display_name': 78,
-    'payment.target.phone': 79,
-    'payment.target.user.username': 80,
-    'payment.target.user.last_name': 81,
-    'payment.target.user.friends_count': 82,
-    'payment.target.user.is_group': 83,
-    'payment.target.user.is_active': 84,
-    'payment.target.user.trust_request': 85,
-    'payment.target.user.phone': 86,
-    'payment.target.user.profile_picture_url': 87,
-    'payment.target.user.is_blocked': 88,
-    'payment.target.user.id': 89,
-    'payment.target.user.identity': 90,
-    'payment.target.user.date_joined': 91,
-    'payment.target.user.about': 92,
-    'payment.target.user.display_name': 93,
-    'payment.target.user.first_name': 94,
-    'payment.target.user.friend_status': 95,
-    'payment.target.user.email': 96,
-    'payment.target.type': 97,
-    'payment.target.email': 98,
-    'payment.audience': 99,
-    'payment.actor.username': 100,
-    'payment.actor.last_name': 101,
-    'payment.actor.friends_count': 102,
-    'payment.actor.is_group': 103,
-    'payment.actor.is_active': 104,
-    'payment.actor.trust_request': 105,
-    'payment.actor.phone': 106,
-    'payment.actor.profile_picture_url': 107,
-    'payment.actor.is_blocked': 108,
-    'payment.actor.id': 109,
-    'payment.actor.identity': 110,
-    'payment.actor.date_joined': 111,
-    'payment.actor.about': 112,
-    'payment.actor.display_name': 113,
-    'payment.actor.first_name': 114,
-    'payment.actor.friend_status': 115,
-    'payment.actor.email': 116,
-    'payment.actor.is_groep': 117,
-    'payment.note': 118,
-    'payment.amount': 119,
-    'payment.action': 120,
+    'payment.status': 70,
     'payment.date_created': 121,
-    'payment.date_reminded': 122,
+    'payment.date_completed': 75,
+    'payment.target.user.username': 80,
+    'payment.target.user.id': 89,
+    # 'user', 'phone', 'redeemable' or 'email', this columns only ever contains phone, redeemable or email when the transaction is pending. Not sure why.
+    'payment.target.type': 97,
+    'payment.actor.username': 100,
+    'payment.actor.id': 109,
+    'payment.actor.is_group': 103,
+    'payment.action': 120,
     'note': 123,
+    'mentions.count': 160,
 }
 
-
-def get_comments_csv(filename):
-    f = open("venmo.csv", "r")
-    csv_out = ""
-    for (row, line) in enumerate(f):
-        print(row)
-        if row > 0:
-            cells = line.split(',')
-            csv_row = ""
-            if len(cells) == 404:
-                for index in comment_csv.values():
-                    # print(index, len(cells))
-                    print(cells[index])
-                    csv_row += cells[index] + ","
-                csv_row = csv_row[:-1] + '\n'
-                csv_out += csv_row
-        if row == 10000:
-            break
-
-    w = open("test.csv", "w")
-    w.write(csv_out)
-    w.close()
-    # print(csv_out)
+likes_csv = [
+    {
+        'payment.id': 71,
+        'likes.data.0.id': 135,
+        'likes.data.0.username': 126,
+        'app.name': 7,
+        'app.id': 6,
+    },
+    {
+        'payment.id': 71,
+        'likes.data.1.id': 157,
+        'likes.data.1.username': 143,
+        'app.name': 7,
+        'app.id': 6,
+    }
+]
 
 
 def check_total_num_rows(filename):
@@ -521,6 +565,46 @@ def check_total_num_rows(filename):
         if out % 100000 == 0:
             print(out)
 
+    print("final:", out)
+
+
+def check_total_num_payment_rows(filename):
+    print("check total num payment rows called")
+    f = open("venmo.csv", "r")
+    out = 0
+    min_ = sys.float_info.max
+    for (ind, row) in enumerate(f):
+        cells = row.split(',')
+        if len(cells) == 404:
+            if len(cells[71]) > 2:
+                if ind > 0:
+                    if min_ > float(cells[71]):
+                        min_ = float(cells[71])
+                out += 1
+        if out % 100000 == 0:
+            print(out)
+    print("min:", min_)
+    print("final:", out)
+
+
+def check_total_num_comment_rows(filename):
+    print("check total num comment rows called")
+    f = open("venmo.csv", "r")
+    out = 0
+    out1 = 0
+    for (ind, row) in enumerate(f):
+        cells = row.split(',')
+        if len(cells) == 404:
+            if ind > 0:
+                if len(cells[10]) > 2:
+                    out += 1
+                    # print(cells[10])
+                if len(cells[8]) > 0:
+                    out1 += int(cells[8])
+                    # print(cells[10])
+        if ind % int(7000000*0.01) == 0:
+            print(round((ind/7000000)*100),
+                  "% complete | out:", out, " | out1:", out1)
     print("final:", out)
 
 
@@ -537,30 +621,136 @@ def check_total_num_valid_rows(filename):
     print("final:", out)
 
 
-def get_payments_csv(filename, num_rows):
+def get_likes_csv(filename, outname, num_rows):
+    print('get_likes_csv function called, writing to:',
+          outname, '| number of rows being read', num_rows)
     f = open("venmo.csv", "r")
     csv_out = ""
     for (row, line) in enumerate(f):
         cells = line.split(',')
         csv_row = []
-        if len(cells) == 404:
-            for index in payment_csv.values():
-                csv_row.append(cells[index])
-            csv_out += ','.join(csv_row) + '\n'
+        if len(cells) == 404 and row > 0:
+            if len(cells[135]) > 0:  # check if comment.data.0.id exists
+                for index in likes_csv[0].values():
+                    csv_row.append(cells[index])
+                csv_out += ','.join(csv_row) + '\n'
+                csv_row = []
+            if len(cells[157]) > 0:  # check if comment.data.1.id exists
+                for index in likes_csv[1].values():
+                    csv_row.append(cells[index])
+                csv_out += ','.join(csv_row) + '\n'
+        elif row == 0:
+            csv_out += ','.join(['payment_id', 'user_id',
+                                 'username', 'app.name', 'app.id']) + '\n'
         if row == num_rows:
             break
         if row % int(num_rows*0.01) == 0:
             print(round((row/num_rows)*100), "% complete")
-    w = open("test.csv", "w")
+    w = open(outname, "w")
     w.write(csv_out)
     w.close()
-    # print(csv_out)
+
+
+def get_users_csv(filename, outname, num_rows):
+    print('get_users_csv function called, writing to:',
+          outname, '| number of rows being read', num_rows)
+    f = open("venmo.csv", "r")
+    csv_out = ""
+    seen = set()
+    numrows = 0
+    for (row, line) in enumerate(f):
+        cells = line.split(',')
+        if len(cells) == 404 and row > 0:
+            for i in user_csv:
+                csv_row = []
+                indeces = list(i.values())
+                if (len(cells[indeces[0]]) > 0) and (cells[indeces[0]] not in seen):
+                    for index in indeces:
+                        csv_row.append(cells[index])
+                    csv_out += ','.join(csv_row) + '\n'
+                    seen.add(cells[indeces[0]])
+                    numrows += 1
+        elif row == 0:
+            csv_out += ','.join(['user_id', 'username', 'first_name', 'last_name', 'display_name', 'about',
+                                 'phone', 'email', 'friends_count', 'is_group', 'is_active', 'date_joined']) + '\n'
+        if row == num_rows:
+            break
+        if row % int(num_rows*0.01) == 0:
+            print(round((row/num_rows)*100), "% complete")
+    f.close()
+    print('Num of Rows:', numrows, " | Num elements in set", len(seen))
+    w = open(outname, "w")
+    w.write(csv_out)
+    w.close()
+
+
+def get_comments_csv(filename, outname, num_rows):
+    print('get_comments_csv function called, writing to:',
+          outname, '| number of rows being read', num_rows)
+    f = open("venmo.csv", "r")
+    csv_out = ""
+    for (row, line) in enumerate(f):
+        cells = line.split(',')
+        csv_row = []
+        if len(cells) == 404 and row > 0:
+            if len(cells[30]) > 0:  # check if comment.data.0.id exists
+                for index in comment_csv[0].values():
+                    csv_row.append(cells[index])
+                csv_out += ','.join(csv_row) + '\n'
+                csv_row = []
+            if len(cells[62]) > 0:  # check if comment.data.1.id exists
+                for index in comment_csv[1].values():
+                    csv_row.append(cells[index])
+                csv_out += ','.join(csv_row) + '\n'
+        elif row == 0:
+            csv_out += ','.join(['comment_id', 'payment_id', 'date_created', 'author_username',
+                                 'author_user.id', 'message', 'mention_count', 'app_name', 'app_id']) + '\n'
+        if row == num_rows:
+            break
+        if row % int(num_rows*0.01) == 0:
+            print(round((row/num_rows)*100), "% complete")
+    w = open(outname, "w")
+    w.write(csv_out)
+    w.close()
+
+
+def get_payments_csv(filename, outname, num_rows):
+    print('get_payments_csv function called, writing to:',
+          outname, '| number of rows being read', num_rows)
+    f = open("venmo.csv", "r")
+    csv_out = ""
+    for (row, line) in enumerate(f):
+        cells = line.split(',')
+        csv_row = []
+        if len(cells) == 404 and row > 0:
+            if len(cells[71]) > 0:  # check if payment.id exists
+                for index in payment_csv.values():
+                    csv_row.append(cells[index])
+                csv_out += ','.join(csv_row) + '\n'
+        elif row == 0:
+            csv_out += ','.join(['payment_id', 'status', 'date_created', 'date_completed', 'target_username', 'target_user_id',
+                                 'target_type', 'target_is_merchant', 'actor_username', 'actor_id', 'actor_is_group', 'action',
+                                 'note', 'mentions_count']) + '\n'
+        if row == num_rows:
+            break
+        if row % int(num_rows*0.01) == 0:
+            print(round((row/num_rows)*100), "% complete")
+
+    w = open(outname, "w")
+    w.write(csv_out)
+    w.close()
 
 
 # Notes
 # total number of rows 7178768
-# total number of rows with 404 columns is 6961247
+# total number of rows with 404 cmns is 6961247
+# all of the rows with 404 columns represent a payment transaction
+# comments on public transaction are uncommon but about 910 of them exist
 if __name__ == "__main__":
-    # get_payments_csv("venmo.csv", 100000)
+    get_likes_csv("venmo.csv", "likes_500thousand.csv", 500000)
+    # get_comments_csv("venmo.csv", "comments_500thousand.csv", 500000)
+    # get_users_csv("venmo.csv", "users_500thousand.csv", 500000)
+    # get_payments_csv("venmo.csv", "payments_500thousand.csv", 500000)
     # check_total_num_rows("venmo.csv")
-    check_total_num_valid_rows("venmo.csv")
+    # check_total_num_valid_rows("venmo.csv")
+    # check_total_num_payment_rows("venmo.csv")
