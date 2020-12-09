@@ -521,23 +521,6 @@ user_csv = [
     }
 ]
 
-payment_csv = {
-    'payment.id': 71,
-    'payment.status': 70,
-    'payment.date_created': 121,
-    'payment.date_completed': 75,
-    'payment.target.user.username': 80,
-    'payment.target.user.id': 89,
-    # 'user', 'phone', 'redeemable' or 'email', this columns only ever contains phone, redeemable or email when the transaction is pending. Not sure why.
-    'payment.target.type': 97,
-    'payment.actor.username': 100,
-    'payment.actor.id': 109,
-    'payment.actor.is_group': 103,
-    'payment.action': 120,
-    'note': 123,
-    'mentions.count': 160,
-}
-
 likes_csv = [
     {
         'payment.id': 71,
@@ -714,6 +697,25 @@ def get_comments_csv(filename, outname, num_rows):
     w.close()
 
 
+payment_csv = {
+    'payment.id': 71,
+    'payment.status': 70,
+    'payment.date_created': 121,
+    'payment.date_completed': 75,
+    'payment.target.user.username': 80,
+    'payment.target.user.id': 89,
+    # 'user', 'phone', 'redeemable' or 'email', this columns only ever contains phone, redeemable or email when the transaction is pending. Not sure why.
+    'payment.target.type': 97,
+    'payment.actor.username': 100,
+    'payment.actor.id': 109,
+    'payment.actor.is_group': 103,
+    'payment.action': 120,
+    'note': 123,
+    'mentions.count': 160,
+    'likes.count': 125,
+}
+
+
 def get_payments_csv(filename, outname, num_rows):
     print('get_payments_csv function called, writing to:',
           outname, '| number of rows being read', num_rows)
@@ -729,8 +731,8 @@ def get_payments_csv(filename, outname, num_rows):
                 csv_out += ','.join(csv_row) + '\n'
         elif row == 0:
             csv_out += ','.join(['payment_id', 'status', 'date_created', 'date_completed', 'target_username', 'target_user_id',
-                                 'target_type', 'target_is_merchant', 'actor_username', 'actor_id', 'actor_is_group', 'action',
-                                 'note', 'mentions_count']) + '\n'
+                                 'target_type', 'actor_username', 'actor_id', 'actor_is_group', 'action',
+                                 'note', 'mentions_count', 'likes_count']) + '\n'
         if row == num_rows:
             break
         if row % int(num_rows*0.01) == 0:
@@ -747,10 +749,10 @@ def get_payments_csv(filename, outname, num_rows):
 # all of the rows with 404 columns represent a payment transaction
 # comments on public transaction are uncommon but about 910 of them exist
 if __name__ == "__main__":
-    get_likes_csv("venmo.csv", "likes_500thousand.csv", 500000)
+    # get_likes_csv("venmo.csv", "likes_500thousand.csv", 500000)
     # get_comments_csv("venmo.csv", "comments_500thousand.csv", 500000)
     # get_users_csv("venmo.csv", "users_500thousand.csv", 500000)
-    # get_payments_csv("venmo.csv", "payments_500thousand.csv", 500000)
+    get_payments_csv("venmo.csv", "payments_500thousand.csv", 500000)
     # check_total_num_rows("venmo.csv")
     # check_total_num_valid_rows("venmo.csv")
     # check_total_num_payment_rows("venmo.csv")
