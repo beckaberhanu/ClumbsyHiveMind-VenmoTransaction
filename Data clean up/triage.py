@@ -440,7 +440,6 @@ user_csv = [
         'payment.target.user.first_name': 94,
         'payment.target.user.last_name': 81,
         'payment.target.user.display_name': 93,
-
     },
     {
         'payment.actor.id': 109,
@@ -713,6 +712,8 @@ payment_csv = {
     'note': 123,
     'mentions.count': 160,
     'likes.count': 125,
+    'app.id': 6,
+    'app.name': 7,
 }
 
 
@@ -732,7 +733,7 @@ def get_payments_csv(filename, outname, num_rows):
         elif row == 0:
             csv_out += ','.join(['payment_id', 'status', 'date_created', 'date_completed', 'target_username', 'target_user_id',
                                  'target_type', 'actor_username', 'actor_id', 'actor_is_group', 'action',
-                                 'note', 'mentions_count', 'likes_count']) + '\n'
+                                 'note', 'mentions_count', 'likes_count', 'app_id', 'app_name']) + '\n'
         if row == num_rows:
             break
         if row % int(num_rows*0.01) == 0:
