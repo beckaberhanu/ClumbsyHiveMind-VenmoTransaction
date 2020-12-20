@@ -412,6 +412,10 @@ columns = {
 
 
 def check_total_num_rows(filename):
+    """
+    [Exploring properties and Diagnosing problems of venmo data.]
+    Check the total number of rows in dataset.
+    """
     print("check total num rows called")
     fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
@@ -426,46 +430,27 @@ def check_total_num_rows(filename):
     print("final:", out)
 
 
-def check_total_num_payment_rows(filename):
-    print("check total num payment rows called")
-    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
-    f = open(fileloc, "r")
-
-    out = 0
-    min_ = sys.float_info.max
-    for (ind, row) in enumerate(f):
-        cells = row.split(",")
-        if len(cells) == 404:
-            if len(cells[71]) > 2:
-                if ind > 0:
-                    if min_ > float(cells[71]):
-                        min_ = float(cells[71])
-                out += 1
-        if out % 100000 == 0:
-            print(out)
-
-    f.close()
-    print("min:", min_)
-    print("final:", out)
-
-
 def check_total_num_comment_rows(filename):
+    """
+    [Exploring properties and Diagnosing problems of venmo data.]
+    Check the number of comments in dataset.
+    """
     print("check total num comment rows called")
     fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
-    out = 0
-    out1 = 0
+    out = 0  # counts up by number actually spotted comments
+    out1 = 0  # counts up by "comments.count" value in each row
     for (ind, row) in enumerate(f):
         cells = row.split(",")
         if len(cells) == 404:
             if ind > 0:
-                if len(cells[10]) > 2:
+                if len(cells[10]) > 0:
                     out += 1
-                    # print(cells[10])
+                if len(cells[66]) > 0:
+                    out += 1
                 if len(cells[8]) > 0:
                     out1 += int(cells[8])
-                    # print(cells[10])
         if ind % int(7000000 * 0.01) == 0:
             print(
                 round((ind / 7000000) * 100), "% complete | out:", out, " | out1:", out1
@@ -475,6 +460,10 @@ def check_total_num_comment_rows(filename):
 
 
 def check_total_num_valid_rows(filename):
+    """
+    [Exploring properties and Diagnosing problems of venmo data.]
+    Check the number of rows in dataset with 404 columns (valid number of columns).
+    """
     print("check valid num rows called")
     fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
@@ -490,6 +479,11 @@ def check_total_num_valid_rows(filename):
 
 
 def check_total_num_category_rows(filename, category):
+    """
+    [Exploring properties and Diagnosing problems of venmo data.]
+    Check the number of transactions notes that contain words matching thos in a
+    list called [category].
+    """
     print("check total num rows called")
     category = set(category)
     fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
@@ -530,6 +524,10 @@ likes_csv = [
 
 
 def get_likes_csv(filename, outname, num_rows):
+    """
+    Generates a new csv file only contaning information related 'likes' for
+    venmo transactions.
+    """
     print(
         "get_likes_csv function called, writing to:",
         outname,
@@ -658,6 +656,9 @@ user_csv = [
 
 
 def get_users_csv(filename, outname, num_rows):
+    """
+    Generates a new csv file only contaning user related information.
+    """
     print(
         "get_users_csv function called, writing to:",
         outname,
@@ -735,6 +736,9 @@ comment_csv = [
 
 
 def get_comments_csv(filename, outname, num_rows):
+    """
+    Generates a new csv file only contaning comment related information.
+    """
     print(
         "get_comments_csv function called, writing to:",
         outname,
@@ -801,6 +805,9 @@ payment_csv = {
 
 
 def get_payments_csv(filename, outname, num_rows):
+    """
+    Generates a new csv file only contaning payments related information.
+    """
     print(
         "get_payments_csv function called, writing to:",
         outname,
@@ -854,6 +861,11 @@ def get_payments_csv(filename, outname, num_rows):
 
 
 def triage_infrequent_users(filename, outname, column_2_index, num_rows=-1):
+    """
+    Creates a new dataset only conaining rows for transaction that invlove an 'active' venmo user
+    (a user who has transacted with atleast 10 other venmo users). The new dataset also only contains
+    columns that are included in the keys of the [column_2_index] dictionary.
+    """
     filename = os.path.dirname(os.path.abspath(__file__)) + filename
     outname = os.path.dirname(os.path.abspath(__file__)) + outname
     f = open(filename, "r")
@@ -1021,14 +1033,6 @@ category2 = [
 # all of the rows with 404 columns represent a payment transaction
 # comments on public transaction are uncommon but about 910 of them exist
 if __name__ == "__main__":
-    # get_likes_csv("../Data/venmo.csv", "../Data/likes_500thousand.csv", 500000)
-    # get_comments_csv("../Data/venmo.csv", "../Data/comments_500thousand.csv", 500000)
-    # get_users_csv("../Data/venmo.csv", "../Data/users_500thousand.csv", 500000)
-    # get_payments_csv("../Data/venmo.csv", "../Data/payments_500thousand.csv", 500000)
-    # check_total_num_rows("../Data/venmo.csv")
-    # check_total_num_valid_rows("venmo.csv")
-    # check_total_num_payment_rows("venmo.csv")
-    # check_total_num_category_rows("../Data/venmo.csv", category2)
     triage_infrequent_users(
         "../Data/venmo.csv", "../Data/venmo_freq_triaged.csv", payment_csv
     )
