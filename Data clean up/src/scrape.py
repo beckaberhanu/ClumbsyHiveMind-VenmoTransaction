@@ -8,107 +8,86 @@ import requests
 import time
 import os.path
 
-new_cookie = {
-    "sb": "o4PVXzaFYKjdn4W23NHVkCwB",
-    "wd": "1680x914",
-    "datr": "o4PVXwj91AD17FU4n0MdH1Tu",
-    "locale": "en_US",
-    "c_user": "100059250804885",
-    "xs": "37%3ARuZRSjB5YznFkQ%3A2%3A1607835552%3A-1%3A-1",
-    "fr": "14D7jRJqFWhdKELBW.AWVBNfkDqFqEl-WmMeEOc6tzAlE.Bf1YOj.yx.AAA.0.0.Bf1Z-c.AWVVwBKaeXA",
-    "dpr": "2",
-    "spin": "r.1003093988_b.trunk_t.1607835555_s.1_v.2_",
+cookies = {
+    ## Add cookies for your facebook account below.
+    ## You can find your cookies by looking at the first request sent to facebook
+    ## in the 'network' tab of the developer tools in your browser. Do not share this publicly!
+    ## The pound signs are just placeholders
+    "sb": "########################",
+    "wd": "###x###",
+    "datr": "########################",
+    "dpr": "#",
+    "c_user": "###############",
+    "xs": "##############################################",
+    "fr": "############################################################################",
+    "spin": "##########################################",
 }
-new_cookie2 = {
-    "sb": "eQbYX7YaHw3oW7JRU4wm-mS2",
-    "wd": "904x914",
-    "datr": "eQbYX2B7r0DysxEXlafzFmgr",
-    "dpr": "2",
-    "c_user": "100059403954417",
-    "xs": "12%3Al0qyiE-jF-aTBg%3A2%3A1607992974%3A-1%3A-1",
-    "fr": "1g1hEqgHkGHvLX3nm.AWV_mwUyCs7AJMK0J3uZqIqPJpA.Bf2AZ5.6Q.AAA.0.0.Bf2AaO.AWU2GprJZoo",
-    "spin": "r.1003097318_b.trunk_t.1607992978_s.1_v.2_",
-}
-user_2_name = {
-    # "2223094500425728367": "Becka Geleto",
-    # "1": "Lena Underwood",
-    # "2": "Anogh Zaman",
-    # "3": "Nadav Skloot",
-}
-driver = webdriver.Chrome(
-    executable_path="/Users/beckaberhanu/Desktop/Academic/College/Semesters/Fifth Semester/Collective-Intelligence/Final Project/Data clean up/src/chromedriver"
-)
-newcookies = [
+
+driver = webdriver.Chrome(executable_path=os.path.dirname(__file__) + "/chromedriver")
+driver_cookies = [
     {"name": key, "domain": "facebook.com", "value": val}
-    for key, val in new_cookie2.items()
+    for key, val in cookies.items()
 ]
 driver.get("https://www.facebook.com")
-for i in newcookies:
+for i in driver_cookies:
     driver.add_cookie(i)
-# print(driver.get_cookies())
+driver.get("https://www.facebook.com")
 num_candidates = 5
 num_neighbors = 5
 
 
-def update_driver_cookie():
-    pass
-
-
-def user_to_displayname(numrows=-1):
-    print("user to displayname called")
-    f = open(os.path.dirname(__file__) + "/../Data/venmo.csv", "r")
-    for (row, line) in enumerate(f):
-        cells = line.split(",")
-        if len(cells) == 404 and row > 0:
-            if cells[89] not in user_2_name:
-                user_2_name[cells[89]] = cells[93]
-            if cells[109] not in user_2_name:
-                user_2_name[cells[109]] = cells[113]
-        if row % 100000 == 0:
-            print(row)
-        if row == numrows:
-            break
-
-
 def check_name_match(name, tile_name):
+    """
+    Function takes in two names and checks if the names are similar enough to be the same person.
+    The first names should match exactly but the last name from the [name] variable only has to exist somewhere
+    in the [tile_name] variable.
+    """
     name_spl = name.lower().split(" ")
     tile_name_spl = tile_name.lower().split(" ")
     return (name_spl[0] == tile_name_spl[0]) and (name_spl[-1] in tile_name_spl)
 
 
 def filter_tiles(tiles, name):
+    """
+    Looks through all candidate html elements from facebook search results and returns only the elements
+    containing relevant (names must match) and sufficient (account should be public and contain location) information.
+    """
     filtered = []
     for ind, tile in enumerate(tiles):
+        # Check1: Element should contain three columns. Might be redundant with check2 but better safe then sorry.
         check1 = len(tile.contents) == 3
+        # Check2: Account should have the option to add them as friend, otherwise it's probably private
         check2 = len(tile.select('div[aria-label="Add friend"]')) > 0
         lives_in = tile.select(
             "div > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.fgxwclzu.knj5qynh.m9osqain span"
         )
+        # Check3: Check if element containg location information might exist. Not a gaurantee. Might be redundant with check4.
         check3 = len(lives_in) > 0
+        # Check4: Account should have the location information. Otherwise it's not worth our time.
         check4 = False
         if check3:
             for i in lives_in:
                 if "Lives in" in i.get_text():
                     check4 = True
                     break
+        # Check5: Check if html element containing account name exists. Redundancy for check6.
         check5 = len(tile.select("h2 span > .nc684nl6 > a > span")) > 0
+        # Check6: Check name from html element matches the person we are looking for.
         check6 = False
         if check5:
             check6 = check_name_match(
                 name, tile.select("h2 span > .nc684nl6 > a > span")[0].get_text()
             )
-        # print(name)
-        # print(tile.select("h2 span > .nc684nl6 > a > span"))
-        if name == "Mitu Usha Turii":
-            print("*" * 70)
-            print(ind, "|", check1, check2, check3, check4, check5, check6)
-        # print(tile)
+        # All checks have to pass an account to be worth verifying if that it is the account we are looking for.
         if check1 and check2 and check3 and check4 and check5 and check6:
             filtered.append(tile)
     return filtered
 
 
 def get_tile_links(tiles):
+    """
+    Accepts a list of candidate html elements and obtains links to their corresponding facebook profiles.
+    """
     all_href = {}
     for tile in tiles:
         location = ""
@@ -125,52 +104,65 @@ def get_tile_links(tiles):
     return all_href
 
 
-def find_user(user_name, neighbors):
-    name = user_name.replace('"', "")
-    name = user_name.replace("'", "")
+def find_user(display_name, neighbors):
+    """
+    Accepts the display name of a venmo user along with a list of the names of other people they have transacted with as
+    input. The function then attempts to find a user on facebook with a matching display name and set of friends that
+    overlap with the people they have transacted with on venmo. A single overlap in facebook friends and venmo transactions is
+    sufficient.
+    """
+    name = display_name.replace('"', "")
+    # URLs can't have empty spaces. %20 is an aliase for an empty space character in URLs
     name_formated = name.replace(" ", "%20")
     driver.get(
         "https://www.facebook.com/search/people/?q=" + name_formated + "&spell=1"
     )
+    # wait 2 seconds for content to load. May depend on internet connection.
     time.sleep(2)
     for i in range(3):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(0.5)
     html = driver.page_source
+    # Parse Html intp Beautiful soup object
     soup = BeautifulSoup(html, features="html.parser")
+    # Get Html elements containing information for potential users of interest
     p_user_tiles = soup.select(
         '.fjf4s8hc.tu1s4ah4.f7vcsfb0.k3eq2f2k.d2edcug0.rq0escxv div[role="article"] .tr9rh885.wkznzc2l.sjgh65i0.dhix69tm > div > .j83agx80'
-    )  # potential user tile, div
+    )
     filtered_tiles = filter_tiles(p_user_tiles, name)
-    p_user_links = get_tile_links(
-        filtered_tiles[:num_candidates]
-    )  # potential user links
+    # Links to facebook profiles for potential users of interest
+    p_user_links = get_tile_links(filtered_tiles[:num_candidates])
     print(
         "🧑‍ Num Candidates located | Before filter:",
         len(p_user_tiles),
         "| Post filter:",
         len(filtered_tiles),
     )
-    # print("Candidate Links:", p_user_links.items())
-    # if len(p_user_tiles) == 0:
-    #     if driver.current_url[36] == "https://www.facebook.com/checkpoint/":
-    #         update_driver_cookie():
+    if len(p_user_tiles) == 0:
+        if driver.current_url[36] == "https://www.facebook.com/checkpoint/":
+            print(
+                "Oh No! Facebook flagged you. NoOoOoOoOoOoOoO!!!!"
+            )  # this should be pretty clear lol!
+            exit()
     for link, location in p_user_links.items():
         driver.get(link)
         time.sleep(3)
+        # locate and obtain an input element with which we could search for overlapping venmo neighbors
         inputElement = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (By.XPATH, '//input[@placeholder="Search"][@dir="auto"][@type="text"]')
             )
         )
+        # counts the number of overlaps between facebook friends and venmo neighbors
         match_count = 0
         for neighbor_name in neighbors[:num_neighbors]:
             neighbor_name = neighbor_name.replace('"', "")
-            neighbor_name = neighbor_name.replace("'", "")
             inputElement.send_keys(neighbor_name)
-            time.sleep(1)
+            # sleep for a second between each search for content to load.
+            time.sleep(1.5)
             html = driver.page_source
             soup = BeautifulSoup(html, features="html.parser")
+            # find if html elements exists that may contain search results for facebook friends
             friends = soup.select(
                 '.j83agx80.btwxx1t3.lhclo0ds.i1fnvgqd .buofh1pr.hv4rvrfc a span[dir="auto"]'
             )
@@ -178,6 +170,7 @@ def find_user(user_name, neighbors):
                 match_count += check_name_match(neighbor_name, friends[0].get_text())
             for char in range(len(neighbor_name) + 2):
                 inputElement.send_keys(Keys.BACK_SPACE)
+            # if facebook account overlaps by 5 venmo neighbors, that is sufficient. No need to continue.
             if match_count == 5:
                 break
         if match_count > 0:
@@ -190,19 +183,27 @@ def find_user(user_name, neighbors):
 
 
 def get_facebook_prof(neighbors_file):
+    """
+    This function accepts the location of a file containing the a correspondence between each user and their
+    venmo neighbors and tries to locate each venmo user on facebook based on their neighbors.
+    """
+    print("get_facebook_profile called")
     f = open(os.path.dirname(__file__) + neighbors_file, "r")
     r = open(os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "r")
+    # The user ID of the last user to have been located by this program to avoid any redundant searchs
     last_id = ""
     for line in r:
         last_id = line.split("\t")[0]
     r.close()
-    print(last_id)
-    w1 = open(os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "a+")
-    start_scrape = False
+    print("Last Id:", last_id)
+    w = open(os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "a+")
+    # only start scraping facebook once you are past the last user id to have already been located
+    start_scrape = last_id == ""
     for rw_ind, line in enumerate(f):
         node, neighbors = line.split("|")
         user_id, displayname = node.split(",")
-        if user_id == last_id:
+        if (user_id == last_id) and (last_id != ""):
+            print("skiped to :", last_id)
             start_scrape = True
             continue
         if not start_scrape:
@@ -210,7 +211,6 @@ def get_facebook_prof(neighbors_file):
         print("-" * 50, "\n" + displayname)
         neighbors = neighbors.replace("\n", "")
         neighbors = neighbors.split(",")
-        # print("Neighbors: ",  neighbors)
         social = find_user(displayname, neighbors)
         if social:
             print(
@@ -221,7 +221,7 @@ def get_facebook_prof(neighbors_file):
                 "| match count:",
                 str(social["match_count"]),
             )
-            w1.write(
+            w.write(
                 "\t".join(
                     [
                         user_id,
@@ -235,23 +235,16 @@ def get_facebook_prof(neighbors_file):
         else:
             print("❌ Not found")
         if (rw_ind > 0) and (rw_ind % 10 == 0):
-            w1.close()
+            # save progress every 10 rows
+            w.close()
             print("*" * 20, rw_ind, "| saving progress |", "*" * 20)
-            w1 = open(
+            w = open(
                 os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "a+"
             )
-    # w1.close()
+    w.close()
 
 
 if __name__ == "__main__":
     # user_to_displayname()
-    # get_facebook_prof("/../Data/Scrape/neighbors2.txt")
-
-    # user_2_name = {
-    #     "1": '"Colton Underwood"',
-    #     "2": "Lena Underwood",
-    #     "3": "Nadav Skloot",
-    #     "4": "Kyaw Za Zaw",
-    #     "5": "Anogh Zaman",
-    # }
-    get_facebook_prof("/../Data/Scrape/fakeusers.txt")
+    get_facebook_prof("/../Data/Scrape/neighbors2.txt")
+    # get_facebook_prof("/../Data/Scrape/fakeusers.txt")

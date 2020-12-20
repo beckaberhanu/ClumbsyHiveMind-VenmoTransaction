@@ -489,6 +489,28 @@ def check_total_num_valid_rows(filename):
     print("final:", out)
 
 
+def check_total_num_category_rows(filename, category):
+    print("check total num rows called")
+    category = set(category)
+    fileloc = os.path.dirname(__file__) + "/" + filename
+    f = open(fileloc, "r")
+    firstline = f.readline()
+    note_ind = firstline.split(",").index("note")
+    total_num = 0
+    for row_ind, line in enumerate(f):
+        row = line.split(",")
+        if len(row) == 404:
+            for i in row[note_ind].lower().strip(":").replace("_", " ").split(" "):
+                if i in category:
+                    # print(row_ind, ":", row[note_ind])
+                    total_num += 1
+                    break
+        if row_ind % 100000 == 0:
+            print(row_ind)
+    print("Total:", total_num)
+    f.close()
+
+
 likes_csv = [
     {
         "payment.id": 71,
@@ -669,13 +691,6 @@ def get_users_csv(filename, outname, num_rows):
                         "first_name",
                         "last_name",
                         "display_name",
-                        "about",
-                        "phone",
-                        "email",
-                        "friends_count",
-                        "is_group",
-                        "is_active",
-                        "date_joined",
                     ]
                 )
                 + "\n"
@@ -777,17 +792,11 @@ payment_csv = {
     "payment.date_completed": 75,
     "payment.target.user.username": 80,
     "payment.target.user.id": 89,
-    # 'user', 'phone', 'redeemable' or 'email', this columns only ever contains phone, redeemable or email when the transaction is pending. Not sure why.
-    "payment.target.type": 97,
     "payment.actor.username": 100,
     "payment.actor.id": 109,
-    "payment.actor.is_group": 103,
     "payment.action": 120,
     "note": 123,
-    "mentions.count": 160,
-    "likes.count": 125,
     "app.id": 6,
-    "app.name": 7,
 }
 
 
@@ -844,6 +853,168 @@ def get_payments_csv(filename, outname, num_rows):
     w.close()
 
 
+def triage_infrequent_users(filename, outname, column_2_index, num_rows=-1):
+    filename = os.path.dirname(__file__) + "/" + filename
+    outname = os.path.dirname(__file__) + "/" + outname
+    f = open(filename, "r")
+    f.readline()
+    user_neighbors = {}
+    actor_column = payment_csv["payment.actor.id"]
+    target_column = payment_csv["payment.target.user.id"]
+    print("*" * 20, "Stage 1", "*" * 20)
+    for rw_ind, line in enumerate(f):
+        row = line.split(",")
+
+        if len(row) == 404:  # avoid defective rows
+            actor_id = row[actor_column]
+            target_id = row[target_column]
+            if actor_id != "" and target_id != "":
+                user_neighbors[actor_id] = user_neighbors.get(actor_id, set([]))
+                user_neighbors[actor_id].add(target_id)
+                user_neighbors[target_id] = user_neighbors.get(target_id, set([]))
+                user_neighbors[target_id].add(actor_id)
+        if rw_ind == num_rows:
+            break
+        if rw_ind % int([num_rows, 7000000][num_rows == -1] * 0.01) == 0:
+            print(
+                round((rw_ind / [num_rows, 7000000][num_rows == -1]) * 100),
+                "% complete",
+            )
+    f.close()
+    valid_users = set(
+        [user for user, neighbors in user_neighbors.items() if len(neighbors) >= 10]
+    )
+    del user_neighbors
+
+    f = open(filename, "r")
+    f.readline()
+    w = open(outname, "w")
+    w.write(
+        ",".join(
+            [
+                "payment_id",
+                "payment_status",
+                "date_created",
+                "date_completed",
+                "target_username",
+                "target_userid",
+                "actor_username",
+                "actor_id",
+                "payment_action",
+                "note",
+                "app.id",
+            ]
+        )
+        + "\n"
+    )
+    print("*" * 20, "Stage 2", "*" * 20)
+    for rw_ind, line in enumerate(f):
+        row = line.split(",")
+        if len(row) == 404:  # avoid defective rows
+            actor_id = row[actor_column]
+            target_id = row[target_column]
+            if (actor_id in valid_users) or (target_id in valid_users):
+                newline = []
+                for _, ind in column_2_index.items():
+                    newline.append(row[ind])
+                w.write(",".join(newline) + "\n")
+        if rw_ind == num_rows:
+            break
+        if rw_ind % int([num_rows, 7000000][num_rows == -1] * 0.01) == 0:
+            print(
+                round((rw_ind / [num_rows, 7000000][num_rows == -1]) * 100),
+                "% complete",
+            )
+    w.close()
+
+
+category1 = [
+    "rent",
+    "apartment",
+    "house",
+    "home",
+    "🏠",
+    "🏡",
+    "🏘️",
+    "🏚️",
+    "electric",
+    "electricity",
+    "⚡",
+    "💡",
+    "🔌",
+    "water",
+    "🚰",
+    "💦",
+    "💧",
+    "wifi",
+    "heating",
+    "heat",
+    "groceries",
+    "grocery",
+    "costco",
+    "target",
+    "wholefoods",
+    "milk",
+    "🥛",
+    "oj",
+    "eggs",
+    "🥚",
+    "🛒",
+    "bill",
+    "bills",
+    "furniture",
+    "🛋",
+]
+category2 = [
+    "food",
+    "pizza",
+    "🍕",
+    "🍔",
+    "🍟",
+    "🍜",
+    "🍗",
+    "🥞",
+    "🌮",
+    "🌭",
+    "🍦",
+    "🍣",
+    "dinner",
+    "lunch",
+    "coffee",
+    "☕",
+    "beer" "🍺",
+    "🍻",
+    "🍸",
+    "wine",
+    "🍷",
+    "restaurant",
+    "🍽️",
+    "🍝",
+    "cafe",
+    "movie",
+    "🎟️",
+    "🎥",
+    "🎬",
+    "🍿",
+    "concert",
+    "🎫",
+    "party",
+    "💃",
+    "🕺",
+    "uber",
+    "lyft",
+    "ride",
+    "🚕",
+    "🚖",
+    "gas",
+    "airbnb",
+    "flight",
+    "✈️",
+    "🛩️",
+    "🛫",
+    "🛬",
+]
+
 # Notes
 # total number of rows 7178768
 # total number of rows with 404 cmns is 6961247
@@ -854,6 +1025,10 @@ if __name__ == "__main__":
     # get_comments_csv("../Data/venmo.csv", "../Data/comments_500thousand.csv", 500000)
     # get_users_csv("../Data/venmo.csv", "../Data/users_500thousand.csv", 500000)
     # get_payments_csv("../Data/venmo.csv", "../Data/payments_500thousand.csv", 500000)
-    check_total_num_rows("../Data/venmo.csv")
+    # check_total_num_rows("../Data/venmo.csv")
     # check_total_num_valid_rows("venmo.csv")
     # check_total_num_payment_rows("venmo.csv")
+    # check_total_num_category_rows("../Data/venmo.csv", category2)
+    triage_infrequent_users(
+        "../Data/venmo.csv", "../Data/venmo_freq_triaged.csv", payment_csv
+    )
