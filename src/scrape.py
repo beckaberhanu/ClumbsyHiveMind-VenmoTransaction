@@ -263,6 +263,4 @@ def get_facebook_prof(neighbors_file):
 
 
 if __name__ == "__main__":
-    # user_to_displayname()
     get_facebook_prof("/../Data/Scrape/neighbors2.txt")
-    # get_facebook_prof("/../Data/Scrape/fakeusers.txt")
