@@ -12,7 +12,7 @@ def user_to_displayname(numrows=-1):
     """
     user_2_name = {}
     print("user to displayname called")
-    f = open(os.path.dirname(__file__) + "/../Data/venmo.csv", "r")
+    f = open(os.path.dirname(os.path.abspath(__file__)) + "/../Data/venmo.csv", "r")
     for (row, line) in enumerate(f):
         cells = line.split(",")
         if len(cells) == 404 and row > 0:
@@ -38,7 +38,7 @@ def load_user_2_neighbors_dict(input_file, num_rows=-1):
     each user to a list of all other users they have transacted with along with the number
     of transaction between each of the other users in the list.
     """
-    f = open(os.path.dirname(__file__) + input_file, "r")
+    f = open(os.path.dirname(os.path.abspath(__file__)) + input_file, "r")
     first_row = f.readline().split(",")
     actor_id_ind = first_row.index("payment.actor.id")
     receiver_id_ind = first_row.index("payment.target.user.id")
@@ -90,7 +90,9 @@ def create_user_2_neighbors_table(input_file, out_file, num_rows=-1):
         if len(i[1]) > 0
     }
 
-    f = open(os.path.dirname(__file__) + "/../Data/Scrape/" + out_file, "w")
+    f = open(
+        os.path.dirname(os.path.abspath(__file__)) + "/../Data/Scrape/" + out_file, "w"
+    )
     user_2_name = user_to_displayname()
     print("*" * 30, "Writing file", "*" * 30)
     num_lines_written = 0
@@ -232,7 +234,7 @@ def generate_user_nodes_and_edges(
     Reads transaction file called [payment_file_in] and creates a csv file of user nodes called [node_file_out] and
     a csv file of user-to-user edges called [edge_file_out] meant for use in gephi.
     """
-    f1 = open(os.path.dirname(__file__) + payment_file_in, "r")
+    f1 = open(os.path.dirname(os.path.abspath(__file__)) + payment_file_in, "r")
     # first row contains names of columns
     first_row = f1.readline().split(",")
     actor_id_ind = first_row.index("actor_id")
@@ -265,7 +267,10 @@ def generate_user_nodes_and_edges(
         if rw_ind == num_rows:
             break
 
-    w1 = open(os.path.dirname(__file__) + "/../Data/Gephi/" + node_file_out, "w")
+    w1 = open(
+        os.path.dirname(os.path.abspath(__file__)) + "/../Data/Gephi/" + node_file_out,
+        "w",
+    )
     w1.write("Id;Label;NumTransactions;Type;Latitude;Longitude\n")
     for i in users.items():
         out = i[0] + ";" + i[1][0] + ";" + str(i[1][1]) + ";User;;\n"
@@ -278,7 +283,10 @@ def generate_user_nodes_and_edges(
         "u2u_2": 10,
         "u2u_3": 4,
     }
-    w2 = open(os.path.dirname(__file__) + "/../Data/Gephi/" + edge_file_out, "w")
+    w2 = open(
+        os.path.dirname(os.path.abspath(__file__)) + "/../Data/Gephi/" + edge_file_out,
+        "w",
+    )
     w2.write("Source;Target;Weight;Type;Category\n")
     for i in transaction_freq.items():
         for cat, val in i[1].items():
@@ -339,7 +347,7 @@ def generate_loc_nodes_and_edges(
         - u2l_1: User-to-Location edge determined from users facebook profile
         - u2l_2: ``   `` ``   ``  ``   ``         ``   location mentioned in transaction notes
     """
-    f1 = open(os.path.dirname(__file__) + location_file_in, "r")
+    f1 = open(os.path.dirname(os.path.abspath(__file__)) + location_file_in, "r")
     location_data = {}
     user_2_loc = {}
     geo_cache = {}
@@ -369,7 +377,7 @@ def generate_loc_nodes_and_edges(
             print(rw_ind)
     f1.close()
 
-    f2 = open(os.path.dirname(__file__) + payment_file_in, "r")
+    f2 = open(os.path.dirname(os.path.abspath(__file__)) + payment_file_in, "r")
     first_row = f2.readline().split(",")
     actor_id_ind = first_row.index("actor_id")
 
@@ -408,7 +416,10 @@ def generate_loc_nodes_and_edges(
         if rw_ind == num_rows:
             break
 
-    w1 = open(os.path.dirname(__file__) + "/../Data/Gephi/" + node_file_out, "w")
+    w1 = open(
+        os.path.dirname(os.path.abspath(__file__)) + "/../Data/Gephi/" + node_file_out,
+        "w",
+    )
     w1.write(
         "Id;Label;NumTransactions;Type;Latitude;Longitude\n"
     )  # columns for gephi node file
@@ -429,7 +440,10 @@ def generate_loc_nodes_and_edges(
         "u2l_1": 40,
         "u2l_2": 5,
     }
-    w2 = open(os.path.dirname(__file__) + "/../Data/Gephi/" + edge_file_out, "w")
+    w2 = open(
+        os.path.dirname(os.path.abspath(__file__)) + "/../Data/Gephi/" + edge_file_out,
+        "w",
+    )
     w2.write("Source;Target;Weight;Type;Category\n")  # columns for gephi edge file
     for user_loc, data in user_2_loc.items():
         for cat, val in data.items():
@@ -446,7 +460,12 @@ def generate_loc_nodes_and_edges(
 
 
 def scaleWeights(input_file, scale=1, power=1):
-    f = open(os.path.dirname(__file__) + input_file, "r")
+    """
+    Reads in a gephi formatted csv edge file and alters the relative strength of weights by
+    exponentiating the weight by a value of [power]. Also linearly scales weights by a value
+    of [scale].
+    """
+    f = open(os.path.dirname(os.path.abspath(__file__)) + input_file, "r")
     firstline = f.readline()
     weight_ind = firstline.split(";").index("Weight")
     rows = []
@@ -455,7 +474,7 @@ def scaleWeights(input_file, scale=1, power=1):
         row[weight_ind] = str((float(row[weight_ind]) ** power) * scale)
         rows.append(row)
     f.close()
-    w = open(os.path.dirname(__file__) + input_file, "w")
+    w = open(os.path.dirname(os.path.abspath(__file__)) + input_file, "w")
     w.write(firstline)
     for i in rows:
         w.write(";".join(i))
@@ -463,7 +482,7 @@ def scaleWeights(input_file, scale=1, power=1):
 
 
 if __name__ == "__main__":
-    scaleWeights("/../Data/Gephi/loc_edges_gephi.csv", scale=100, power=1)
+    scaleWeights("/../Data/Gephi/loc_edges_gephi.csv", scale=1, power=1)
     # scaleWeights("user_edges_gephi.csv", scale = 1, power = 1)
     # generate_user_nodes_and_edges(
     #     "/../Data/venmo_freq_triaged.csv",
@@ -476,4 +495,3 @@ if __name__ == "__main__":
     #     "loc_nodes_gephi.csv",
     #     "loc_edges_gephi.csv",
     # )
-    # load_user_neighbors("/../Data/venmo.csv", "neighbors2.txt")

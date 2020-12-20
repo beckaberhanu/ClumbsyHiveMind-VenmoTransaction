@@ -413,7 +413,7 @@ columns = {
 
 def check_total_num_rows(filename):
     print("check total num rows called")
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
     out = 0
@@ -428,7 +428,7 @@ def check_total_num_rows(filename):
 
 def check_total_num_payment_rows(filename):
     print("check total num payment rows called")
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
     out = 0
@@ -451,7 +451,7 @@ def check_total_num_payment_rows(filename):
 
 def check_total_num_comment_rows(filename):
     print("check total num comment rows called")
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
     out = 0
@@ -476,7 +476,7 @@ def check_total_num_comment_rows(filename):
 
 def check_total_num_valid_rows(filename):
     print("check valid num rows called")
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
     out = 0
@@ -492,7 +492,7 @@ def check_total_num_valid_rows(filename):
 def check_total_num_category_rows(filename, category):
     print("check total num rows called")
     category = set(category)
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
     firstline = f.readline()
     note_ind = firstline.split(",").index("note")
@@ -536,7 +536,7 @@ def get_likes_csv(filename, outname, num_rows):
         "| number of rows being read",
         num_rows,
     )
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
     csv_out = ""
@@ -563,7 +563,7 @@ def get_likes_csv(filename, outname, num_rows):
         if row % int(num_rows * 0.01) == 0:
             print(round((row / num_rows) * 100), "% complete")
     f.close()
-    outloc = os.path.dirname(__file__) + "/" + outname
+    outloc = os.path.dirname(os.path.abspath(__file__)) + outname
     w = open(outloc, "w")
     w.write(csv_out)
     w.close()
@@ -664,7 +664,7 @@ def get_users_csv(filename, outname, num_rows):
         "| number of rows being read",
         num_rows,
     )
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
 
     csv_out = ""
@@ -702,7 +702,7 @@ def get_users_csv(filename, outname, num_rows):
     f.close()
     print("Num of Rows:", numrows, " | Num elements in set", len(seen))
 
-    outloc = os.path.dirname(__file__) + "/" + outname
+    outloc = os.path.dirname(os.path.abspath(__file__)) + outname
     w = open(outloc, "w")
     w.write(csv_out)
     w.close()
@@ -741,7 +741,7 @@ def get_comments_csv(filename, outname, num_rows):
         "| number of rows being read",
         num_rows,
     )
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
     csv_out = ""
     for (row, line) in enumerate(f):
@@ -779,7 +779,7 @@ def get_comments_csv(filename, outname, num_rows):
         if row % int(num_rows * 0.01) == 0:
             print(round((row / num_rows) * 100), "% complete")
     f.close()
-    outloc = os.path.dirname(__file__) + "/" + outname
+    outloc = os.path.dirname(os.path.abspath(__file__)) + outname
     w = open(outloc, "w")
     w.write(csv_out)
     w.close()
@@ -807,7 +807,7 @@ def get_payments_csv(filename, outname, num_rows):
         "| number of rows being read",
         num_rows,
     )
-    fileloc = os.path.dirname(__file__) + "/" + filename
+    fileloc = os.path.dirname(os.path.abspath(__file__)) + filename
     f = open(fileloc, "r")
     csv_out = ""
     for (row, line) in enumerate(f):
@@ -847,15 +847,15 @@ def get_payments_csv(filename, outname, num_rows):
         if row % int(num_rows * 0.01) == 0:
             print(round((row / num_rows) * 100), "% complete")
     f.close()
-    outloc = os.path.dirname(__file__) + "/" + outname
+    outloc = os.path.dirname(os.path.abspath(__file__)) + outname
     w = open(outloc, "w")
     w.write(csv_out)
     w.close()
 
 
 def triage_infrequent_users(filename, outname, column_2_index, num_rows=-1):
-    filename = os.path.dirname(__file__) + "/" + filename
-    outname = os.path.dirname(__file__) + "/" + outname
+    filename = os.path.dirname(os.path.abspath(__file__)) + filename
+    outname = os.path.dirname(os.path.abspath(__file__)) + outname
     f = open(filename, "r")
     f.readline()
     user_neighbors = {}

@@ -12,7 +12,7 @@ cookies = {
     ## Add cookies for your facebook account below.
     ## You can find your cookies by looking at the first request sent to facebook
     ## in the 'network' tab of the developer tools in your browser. Do not share this publicly!
-    ## The pound signs are just placeholders
+    ## The pound signs are just placeholders.
     "sb": "########################",
     "wd": "###x###",
     "datr": "########################",
@@ -23,7 +23,9 @@ cookies = {
     "spin": "##########################################",
 }
 
-driver = webdriver.Chrome(executable_path=os.path.dirname(__file__) + "/chromedriver")
+driver = webdriver.Chrome(
+    executable_path=os.path.dirname(os.path.abspath(__file__)) + "/chromedriver"
+)
 driver_cookies = [
     {"name": key, "domain": "facebook.com", "value": val}
     for key, val in cookies.items()
@@ -32,7 +34,13 @@ driver.get("https://www.facebook.com")
 for i in driver_cookies:
     driver.add_cookie(i)
 driver.get("https://www.facebook.com")
+
+# Maximum number of candidates to consider for a potential facebook account match before
+# giving up and searching for a new user
 num_candidates = 5
+
+# Maximum number of facebook friend to venmo neighbor overlaps to search for before validating
+# account match. This will also be the maximum match_count.git
 num_neighbors = 5
 
 
@@ -188,15 +196,23 @@ def get_facebook_prof(neighbors_file):
     venmo neighbors and tries to locate each venmo user on facebook based on their neighbors.
     """
     print("get_facebook_profile called")
-    f = open(os.path.dirname(__file__) + neighbors_file, "r")
-    r = open(os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "r")
+    f = open(os.path.dirname(os.path.abspath(__file__)) + neighbors_file, "r")
+    r = open(
+        os.path.dirname(os.path.abspath(__file__))
+        + "/../Data/Scrape/user_location.tsv",
+        "r",
+    )
     # The user ID of the last user to have been located by this program to avoid any redundant searchs
     last_id = ""
     for line in r:
         last_id = line.split("\t")[0]
     r.close()
     print("Last Id:", last_id)
-    w = open(os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "a+")
+    w = open(
+        os.path.dirname(os.path.abspath(__file__))
+        + "/../Data/Scrape/user_location.tsv",
+        "a+",
+    )
     # only start scraping facebook once you are past the last user id to have already been located
     start_scrape = last_id == ""
     for rw_ind, line in enumerate(f):
@@ -239,7 +255,9 @@ def get_facebook_prof(neighbors_file):
             w.close()
             print("*" * 20, rw_ind, "| saving progress |", "*" * 20)
             w = open(
-                os.path.dirname(__file__) + "/../Data/Scrape/user_location.tsv", "a+"
+                os.path.dirname(os.path.abspath(__file__))
+                + "/../Data/Scrape/user_location.tsv",
+                "a+",
             )
     w.close()
 
